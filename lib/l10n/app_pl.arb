@@ -25,6 +25,7 @@
   "bufferLabel": "Buforowanie offline",
   "wakelockLabel": "Blokada uśpienia",
   "stopDetectionLabel": "Wykrywanie zatrzymania",
+  "preferPlatformProvidersLabel": "Use system location",
   "trackingLabel": "Ciągłe śledzenie",
   "advancedLabel": "Ustawienia zaawansowane",
   "passwordLabel": "Hasło",
@@ -33,5 +34,6 @@
   "startAction": "Uruchom usługę",
   "stopAction": "Zatrzymaj usługę",
   "sosAction": "Wyślij SOS",
-  "disclosureMessage": "Ta aplikacja zbiera w tle dane dotyczące lokalizacji i aktywności i wysyła je na skonfigurowany serwer."
+  "disclosureMessage": "Ta aplikacja zbiera w tle dane dotyczące lokalizacji i aktywności i wysyła je na skonfigurowany serwer.",
+  "configurationMessage": "Apply new configuration?"
 }

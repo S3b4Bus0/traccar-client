@@ -25,6 +25,7 @@
   "bufferLabel": "Buffer offline",
   "wakelockLabel": "Bloqueio de despertar",
   "stopDetectionLabel": "Detecção de parada",
+  "preferPlatformProvidersLabel": "Use system location",
   "trackingLabel": "Rastreamento contínuo",
   "advancedLabel": "Configurações avançadas",
   "passwordLabel": "Senha",
@@ -33,5 +34,6 @@
   "startAction": "Iniciar serviço",
   "stopAction": "Parar serviço",
   "sosAction": "Enviar SOS",
-  "disclosureMessage": "Este aplicativo coleta dados de localização e atividade em segundo plano e os envia para o servidor configurado."
+  "disclosureMessage": "Este aplicativo coleta dados de localização e atividade em segundo plano e os envia para o servidor configurado.",
+  "configurationMessage": "Apply new configuration?"
 }

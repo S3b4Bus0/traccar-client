@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
+import 'package:flutter/services.dart';
 import 'package:traccar_client/password_service.dart';
 
+import 'geolocation_service.dart';
 import 'preferences.dart';
 
 class PushService {
@@ -15,33 +17,33 @@ class PushService {
     FirebaseMessaging.onBackgroundMessage(pushServiceBackgroundHandler);
     FirebaseMessaging.onMessage.listen(_onMessage);
     FirebaseMessaging.instance.onTokenRefresh.listen(_uploadToken);
-    bg.BackgroundGeolocation.onEnabledChange((enabled) async {
-      if (enabled) {
-        try {
-          _uploadToken(await FirebaseMessaging.instance.getToken());
-        } catch (error) {
-          developer.log('Failed to get notificaion token', error: error);
-        }
-      }
-    });
+    unawaited(_uploadInitialToken());
+  }
+
+  static Future<void> _uploadInitialToken() async {
+    try {
+      await _uploadToken(await FirebaseMessaging.instance.getToken());
+    } catch (error) {
+      developer.log('Failed to get notification token', error: error);
+    }
   }
 
   static Future<void> _onMessage(RemoteMessage message) async {
     final command = message.data['command'];
     FirebaseCrashlytics.instance.log('push_command: $command');
-    switch (command) {
-      case 'positionSingle':
-        try {
-          await bg.BackgroundGeolocation.getCurrentPosition(samples: 1, persist: true, extras: {'remote': true});
-        } catch (error) {
-          developer.log('Failed to get position', error: error);
-        }
-      case 'positionPeriodic':
-        await bg.BackgroundGeolocation.start();
-      case 'positionStop':
-        await bg.BackgroundGeolocation.stop();
-      case 'factoryReset':
-        await PasswordService.setPassword('');
+    try {
+      switch (command) {
+        case 'positionSingle':
+          await GeolocationService.tracker.requestPosition();
+        case 'positionPeriodic':
+          await GeolocationService.tracker.start();
+        case 'positionStop':
+          await GeolocationService.tracker.stop();
+        case 'factoryReset':
+          await PasswordService.setPassword('');
+      }
+    } on PlatformException {
+      // permission denied or startup error
     }
   }
 
@@ -65,7 +67,7 @@ class PushService {
 Future<void> pushServiceBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   await Preferences.init();
-  await bg.BackgroundGeolocation.ready(Preferences.geolocationConfig(false));
+  await GeolocationService.tracker.init(Preferences.buildConfig());
   FirebaseCrashlytics.instance.log('push_background_handler');
   await PushService._onMessage(message);
 }

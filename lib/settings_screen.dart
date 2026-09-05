@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 import 'package:traccar_client/main.dart';
 import 'package:traccar_client/password_service.dart';
 import 'package:traccar_client/qr_code_screen.dart';
-import 'package:wakelock_partial_android/wakelock_partial_android.dart';
 
+import 'geolocation_service.dart';
 import 'l10n/app_localizations.dart';
 import 'preferences.dart';
 
@@ -80,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         await Preferences.instance.setString(key, result);
       }
-      await bg.BackgroundGeolocation.setConfig(Preferences.geolocationConfig(true));
+      await GeolocationService.tracker.setConfig(Preferences.buildConfig());
       setState(() {});
     }
   }
@@ -117,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String? value;
     if (isInt) {
       final intValue = Preferences.instance.getInt(key);
-      if (intValue != null && intValue > 0) {
+      if (intValue != null && (intValue > 0 || key == Preferences.distance)) {
         value = intValue.toString();
       } else {
         value = AppLocalizations.of(context)!.disabledValue;
@@ -150,7 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
         if (selectedAccuracy != null) {
           await Preferences.instance.setString(Preferences.accuracy, selectedAccuracy);
-          await bg.BackgroundGeolocation.setConfig(Preferences.geolocationConfig(true));
+          await GeolocationService.tracker.setConfig(Preferences.buildConfig());
           setState(() {});
         }
       },
@@ -193,14 +192,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           if (advanced)
-            _buildListTile(AppLocalizations.of(context)!.fastestIntervalLabel, Preferences.fastestInterval, true),
-          if (advanced)
             SwitchListTile(
               title: Text(AppLocalizations.of(context)!.bufferLabel),
               value: Preferences.instance.getBool(Preferences.buffer) ?? true,
               onChanged: (value) async {
                 await Preferences.instance.setBool(Preferences.buffer, value);
-                await bg.BackgroundGeolocation.setConfig(Preferences.geolocationConfig(true));
+                await GeolocationService.tracker.setConfig(Preferences.buildConfig());
                 setState(() {});
               },
             ),
@@ -210,14 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: Preferences.instance.getBool(Preferences.wakelock) ?? false,
               onChanged: (value) async {
                 await Preferences.instance.setBool(Preferences.wakelock, value);
-                if (value) {
-                  final state = await bg.BackgroundGeolocation.state;
-                  if (state.isMoving == true) {
-                    WakelockPartialAndroid.acquire();
-                  }
-                } else {
-                  WakelockPartialAndroid.release();
-                }
+                await GeolocationService.tracker.setConfig(Preferences.buildConfig());
                 setState(() {});
               },
             ),
@@ -227,7 +217,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: Preferences.instance.getBool(Preferences.stopDetection) ?? true,
               onChanged: (value) async {
                 await Preferences.instance.setBool(Preferences.stopDetection, value);
-                await bg.BackgroundGeolocation.setConfig(Preferences.geolocationConfig(true));
+                await GeolocationService.tracker.setConfig(Preferences.buildConfig());
+                setState(() {});
+              },
+            ),
+          if (advanced && Platform.isAndroid)
+            SwitchListTile(
+              title: Text(AppLocalizations.of(context)!.preferPlatformProvidersLabel),
+              value: Preferences.instance.getBool(Preferences.preferPlatformProviders) ?? false,
+              onChanged: (value) async {
+                await Preferences.instance.setBool(Preferences.preferPlatformProviders, value);
+                await GeolocationService.tracker.setConfig(Preferences.buildConfig());
                 setState(() {});
               },
             ),

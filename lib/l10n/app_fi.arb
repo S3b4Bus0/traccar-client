@@ -25,6 +25,7 @@
   "bufferLabel": "Offline puskuri",
   "wakelockLabel": "Pakota päälläolo",
   "stopDetectionLabel": "Pysähdyksissä olon tunnistus",
+  "preferPlatformProvidersLabel": "Use system location",
   "trackingLabel": "Jatkuva paikannus",
   "advancedLabel": "Lisäasetukset",
   "passwordLabel": "Salasana",
@@ -33,5 +34,6 @@
   "startAction": "Käynnistä seuranta",
   "stopAction": "Lopeta seuranta",
   "sosAction": "Lähetä SOS",
-  "disclosureMessage": "This app collects location and activity data in the background and sends it to the configured server."
+  "disclosureMessage": "This app collects location and activity data in the background and sends it to the configured server.",
+  "configurationMessage": "Apply new configuration?"
 }
